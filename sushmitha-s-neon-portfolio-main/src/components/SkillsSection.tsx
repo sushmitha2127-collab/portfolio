@@ -1,18 +1,24 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import ScrollReveal from "./ScrollReveal";
 import { Code, Globe, Wrench, Users, Shield } from "lucide-react";
 import { ref, onValue } from "firebase/database";
 import { db } from "../firebase";
 
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, React.ReactNode> = {
   "Programming": <Code size={20} />,
   "Web Development": <Globe size={20} />,
   "Tools": <Wrench size={20} />,
   "Soft Skills": <Users size={20} />,
 };
 
+interface Skill {
+  id: string;
+  name: string;
+  level: string;
+}
+
 const SkillsSection = () => {
-  const [skills, setSkills] = useState<any[]>([]);
+  const [skills, setSkills] = useState<Skill[]>([]);
 
   useEffect(() => {
     const unsub = onValue(ref(db, "skills"), (snapshot) => {
@@ -27,7 +33,7 @@ const SkillsSection = () => {
   }, []);
 
   // Group skills by their generic "level/category" string
-  const groupedSkills = skills.reduce((acc: any, skill: any) => {
+  const groupedSkills = skills.reduce((acc: Record<string, Skill[]>, skill: Skill) => {
     const groupName = skill.level || "Other";
     if (!acc[groupName]) acc[groupName] = [];
     acc[groupName].push(skill);
@@ -54,7 +60,7 @@ const SkillsSection = () => {
                     <h3 className="font-heading font-semibold text-lg">{groupName}</h3>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {groupedSkills[groupName].map((skill: any) => (
+                    {groupedSkills[groupName].map((skill: Skill) => (
                       <span 
                         key={skill.id}
                         className="px-3 py-1.5 bg-primary/5 text-foreground/80 border border-primary/20 rounded-md text-sm font-medium hover:bg-primary/10 transition-colors"

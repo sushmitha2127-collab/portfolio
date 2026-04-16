@@ -7,8 +7,8 @@ import { toast } from "sonner";
 
 // Interfaces
 interface Profile { name: string; role: string; about: string; }
-interface Contact { email: string; phone: string; linkedin: string; }
-interface Item { id: string; [key: string]: any; }
+interface Contact { email: string; phone: string; linkedin: string; github?: string; }
+interface Item { id: string; [key: string]: string | number | boolean | undefined | null; }
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("profile");
@@ -29,7 +29,7 @@ const Dashboard = () => {
       if (snapshot.exists()) setContact(snapshot.val());
     });
     
-    const fetchList = (path: string, setter: any) => {
+    const fetchList = (path: string, setter: (items: Item[]) => void) => {
       return onValue(ref(db, path), (snapshot) => {
         if (snapshot.exists()) {
           const data = snapshot.val();
@@ -50,7 +50,7 @@ const Dashboard = () => {
   }, []);
 
   // Handlers for single objects (Profile, Contact)
-  const saveNode = async (path: string, data: any) => {
+  const saveNode = async (path: string, data: Profile | Contact) => {
     try {
       await set(ref(db, path), data);
       toast.success(`${path} saved successfully`);
@@ -60,7 +60,7 @@ const Dashboard = () => {
   };
 
   // Handlers for lists
-  const addListItem = async (path: string, defaultData: any) => {
+  const addListItem = async (path: string, defaultData: Omit<Item, "id">) => {
     try {
       await push(ref(db, path), defaultData);
       toast.success("Item added");
@@ -69,7 +69,7 @@ const Dashboard = () => {
     }
   };
 
-  const updateListItem = async (path: string, id: string, data: any) => {
+  const updateListItem = async (path: string, id: string, data: Partial<Omit<Item, "id">>) => {
     try {
       await update(ref(db, `${path}/${id}`), data);
       toast.success("Item updated");

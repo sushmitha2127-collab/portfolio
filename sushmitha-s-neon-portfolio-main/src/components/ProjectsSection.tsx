@@ -4,8 +4,18 @@ import { ExternalLink, Github } from "lucide-react";
 import { ref, onValue } from "firebase/database";
 import { db } from "../firebase";
 
+interface Project {
+  id: string;
+  title: string;
+  subtitle?: string;
+  description: string;
+  tech: string;
+  github?: string;
+  demo?: string;
+}
+
 const ProjectsSection = () => {
-  const [projects, setProjects] = useState<any[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
     const unsub = onValue(ref(db, "projects"), (snapshot) => {

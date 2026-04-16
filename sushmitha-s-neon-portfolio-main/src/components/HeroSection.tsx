@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Github, Linkedin, ArrowDown } from "lucide-react";
 import profileImg from "@/assets/profile.png";
@@ -9,8 +9,10 @@ const HeroSection = () => {
   const [profile, setProfile] = useState({ name: "Sushmitha S", role: "Front-End Developer, BCA Student", about: "Frontend developer who enjoys turning ideas into websites." });
   const [contact, setContact] = useState({ linkedin: "https://www.linkedin.com/in/sushmitha-s-875077318", github: "https://github.com/sushmitha2127-collab" });
 
-  const roles = profile.role.split(",").map(r => r.trim()).filter(Boolean);
-  const displayRoles = roles.length > 0 ? roles : ["Developer"];
+  const displayRoles = useMemo(() => {
+    const roles = profile.role.split(",").map(r => r.trim()).filter(Boolean);
+    return roles.length > 0 ? roles : ["Developer"];
+  }, [profile.role]);
 
   const [roleIndex, setRoleIndex] = useState(0);
   const [text, setText] = useState("");

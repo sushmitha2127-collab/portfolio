@@ -4,8 +4,16 @@ import { GraduationCap, Award, Globe2 } from "lucide-react";
 import { ref, onValue } from "firebase/database";
 import { db } from "../firebase";
 
+interface Achievement {
+  id: string;
+  title: string;
+  subtitle: string;
+  year: string;
+  type: "education" | "certification" | "language";
+}
+
 const EducationSection = () => {
-  const [achievements, setAchievements] = useState<any[]>([]);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
 
   useEffect(() => {
     const unsub = onValue(ref(db, "achievements"), (snapshot) => {
