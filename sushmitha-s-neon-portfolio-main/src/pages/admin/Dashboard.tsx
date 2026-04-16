@@ -23,20 +23,47 @@ const Dashboard = () => {
   // Fetch Data
   useEffect(() => {
     const unsubProfile = onValue(ref(db, "profile"), (snapshot) => {
-      if (snapshot.exists()) setProfile(snapshot.val());
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        setProfile({
+          name: data.name || "",
+          role: data.role || "",
+          about: data.about || ""
+        });
+      }
+    }, (error) => {
+      console.error("Firebase Profile Error:", error);
+      toast.error("Failed to load profile data");
     });
     const unsubContact = onValue(ref(db, "contact"), (snapshot) => {
-      if (snapshot.exists()) setContact(snapshot.val());
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        setContact({
+          email: data.email || "",
+          phone: data.phone || "",
+          linkedin: data.linkedin || "",
+          github: data.github || ""
+        });
+      }
+    }, (error) => {
+      console.error("Firebase Contact Error:", error);
+      toast.error("Failed to load contact data");
     });
     
     const fetchList = (path: string, setter: (items: Item[]) => void) => {
       return onValue(ref(db, path), (snapshot) => {
         if (snapshot.exists()) {
           const data = snapshot.val();
-          setter(Object.keys(data).map(key => ({ id: key, ...data[key] })));
+          // If Firebase returns an array (sometimes happens with indexed data), handle it
+          const itemsArray = Array.isArray(data) 
+            ? data.map((item, index) => ({ id: index.toString(), ...item }))
+            : Object.keys(data).map(key => ({ id: key, ...data[key] }));
+          setter(itemsArray);
         } else {
           setter([]);
         }
+      }, (error) => {
+        console.error(`Firebase ${path} error:`, error);
       });
     };
     
@@ -141,15 +168,15 @@ const Dashboard = () => {
             <div className="glass-card p-6 space-y-4">
               <div>
                 <label className="block text-sm mb-1">Name</label>
-                <input type="text" className="w-full bg-background/50 border border-primary/20 rounded p-2" value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} />
+                <input type="text" className="w-full bg-background/50 border border-primary/20 rounded p-2" value={profile.name || ""} onChange={e => setProfile({...profile, name: e.target.value})} />
               </div>
               <div>
                 <label className="block text-sm mb-1">Roles (comma separated)</label>
-                <input type="text" className="w-full bg-background/50 border border-primary/20 rounded p-2" value={profile.role} onChange={e => setProfile({...profile, role: e.target.value})} />
+                <input type="text" className="w-full bg-background/50 border border-primary/20 rounded p-2" value={profile.role || ""} onChange={e => setProfile({...profile, role: e.target.value})} />
               </div>
               <div>
                 <label className="block text-sm mb-1">About</label>
-                <textarea rows={5} className="w-full bg-background/50 border border-primary/20 rounded p-2" value={profile.about} onChange={e => setProfile({...profile, about: e.target.value})} />
+                <textarea rows={5} className="w-full bg-background/50 border border-primary/20 rounded p-2" value={profile.about || ""} onChange={e => setProfile({...profile, about: e.target.value})} />
               </div>
               <button className="neon-button px-4 py-2 text-sm" onClick={() => saveNode("profile", profile)}>Save Profile</button>
             </div>
@@ -167,8 +194,8 @@ const Dashboard = () => {
               <div className="grid sm:grid-cols-2 gap-4">
                 {skills.map(skill => (
                   <div key={skill.id} className="glass-card p-4 space-y-3">
-                    <input className="w-full bg-background/50 border border-primary/20 rounded p-2 text-sm" value={skill.name} onChange={(e) => updateListItem("skills", skill.id, { name: e.target.value })} placeholder="Skill Name" />
-                    <input className="w-full bg-background/50 border border-primary/20 rounded p-2 text-sm" value={skill.level} onChange={(e) => updateListItem("skills", skill.id, { level: e.target.value })} placeholder="Level/Category" />
+                    <input className="w-full bg-background/50 border border-primary/20 rounded p-2 text-sm" value={skill.name || ""} onChange={(e) => updateListItem("skills", skill.id, { name: e.target.value })} placeholder="Skill Name" />
+                    <input className="w-full bg-background/50 border border-primary/20 rounded p-2 text-sm" value={skill.level || ""} onChange={(e) => updateListItem("skills", skill.id, { level: e.target.value })} placeholder="Level/Category" />
                     <button className="text-red-500 text-sm flex gap-1 items-center hover:opacity-80" onClick={() => deleteListItem("skills", skill.id)}><Trash2 size={14}/> Delete</button>
                   </div>
                 ))}
@@ -241,15 +268,15 @@ const Dashboard = () => {
             <div className="glass-card p-6 space-y-4">
               <div>
                 <label className="block text-sm mb-1">Email</label>
-                <input type="email" className="w-full bg-background/50 border border-primary/20 rounded p-2" value={contact.email} onChange={e => setContact({...contact, email: e.target.value})} />
+                <input type="email" className="w-full bg-background/50 border border-primary/20 rounded p-2" value={contact.email || ""} onChange={e => setContact({...contact, email: e.target.value})} />
               </div>
               <div>
                 <label className="block text-sm mb-1">Phone</label>
-                <input type="text" className="w-full bg-background/50 border border-primary/20 rounded p-2" value={contact.phone} onChange={e => setContact({...contact, phone: e.target.value})} />
+                <input type="text" className="w-full bg-background/50 border border-primary/20 rounded p-2" value={contact.phone || ""} onChange={e => setContact({...contact, phone: e.target.value})} />
               </div>
               <div>
                 <label className="block text-sm mb-1">LinkedIn URL</label>
-                <input type="url" className="w-full bg-background/50 border border-primary/20 rounded p-2" value={contact.linkedin} onChange={e => setContact({...contact, linkedin: e.target.value})} />
+                <input type="url" className="w-full bg-background/50 border border-primary/20 rounded p-2" value={contact.linkedin || ""} onChange={e => setContact({...contact, linkedin: e.target.value})} />
               </div>
                <div>
                 <label className="block text-sm mb-1">GitHub URL (Optional)</label>
